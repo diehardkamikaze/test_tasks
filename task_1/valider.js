@@ -105,9 +105,13 @@ function json_valider(event)
     obj.i = 0;
     if (json_parser(data, obj) && data[obj.i] == undefined)
         result.innerHTML = "VALID";
-    else
-        result.innerHTML = "INVALID";
- 
+	else
+	{
+		 result.innerHTML = "INVALID";
+		textarea.selectionStart =  obj.i;
+		textarea.selectionEnd = obj.i + 1;
+		textarea.focus();
+	}
 }
 
 //main
