@@ -14,9 +14,9 @@ function handle_string(data, obj)
     return (1);
 }
 
+
 function handle_key(data, obj)
 {
-    skip_spaces(data, obj);
     if (data[obj.i] == '"' && ++obj.i)
     {
         if (!handle_string(data, obj))
@@ -25,35 +25,54 @@ function handle_key(data, obj)
     else 
         return (0);
     skip_spaces(data, obj);
-    if (data[obj.i] != ':')
-        return (0);
-    obj.i++;
     return (1);
 }
 
 function handle_object(data, obj)
 {
+    skip_spaces(data, obj);
+
+    if (data[obj.i] == '}' && ++obj.i)
+        return (1);
     if (!handle_key(data, obj))
+        return (0);
+    if (data[obj.i] !== ':')
+        return (0);
+
+    ++obj.i;
+    if (!json_parser(data, obj))
         return (0);
     while (data[obj.i] == ',')
     {
+        obj.i++;
+        skip_spaces(data, obj);
         if (!handle_key(data, obj))
-        return (0);
-    }
+            return (0);
+        if (data[obj.i] !== ':')
+            return (0);
+        ++obj.i;
 
-    return (1);
+        if (!json_parser(data, obj))
+            return (0);
+
+    }
+    if (data[obj.i] == '}' && ++obj.i)
+        return (1);
+    return (0);
 }
 
 function json_parser(data, obj)
 {
     skip_spaces(data, obj);
+    if (data[obj.i] === undefined)
+        return (1);
 
     if (data[obj.i] == '{' && ++obj.i)
     {
         if(!handle_object(data, obj))
             return (0);
     } 
-    if (data[obj.i] == '"' && ++obj.i)
+    else if (data[obj.i] == '"' && ++obj.i)
     {
         if (!handle_string(data, obj))
             return (0);
@@ -71,8 +90,8 @@ function json_valider(event)
     var obj = {};
 
     obj.i = 0;
-    json_parser(data, obj);
-    if (obj.i === data.length)
+   // json_parser(data, obj);
+    if (json_parser(data, obj) && data[obj.i] == undefined)
         result.innerHTML = "VALID";
     else
         result.innerHTML = "INVALID";
